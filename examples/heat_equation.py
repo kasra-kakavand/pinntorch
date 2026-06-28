@@ -131,6 +131,56 @@ def main():
     print(f"  IC:    {history['ic_loss'][-1]:.6e}")
     print(f"  BC:    {history['bc_loss'][-1]:.6e}")
 
+    # ------------------------------------------------------------------
+    # Visualizations
+    # ------------------------------------------------------------------
+    print("\nGenerating visualizations...")
+
+    # Analytical solution for comparison
+    def analytical(x, t):
+        return np.sin(np.pi * x) * np.exp(-alpha * np.pi**2 * t)
+
+    # 1. Training history (loss curves)
+    pt.plot_training_history(
+        history,
+        title="Heat Equation: Training History",
+        save_path="heat_training_history.png",
+        show=False,
+    )
+
+    # 2. PINN solution heatmap
+    pt.plot_solution(
+        model,
+        title="Heat Equation: PINN Solution u(x, t)",
+        save_path="heat_solution.png",
+        show=False,
+    )
+
+    # 3. PINN vs analytical comparison (3 panels)
+    pt.plot_comparison(
+        model,
+        analytical=analytical,
+        title="Heat Equation: PINN vs Analytical",
+        save_path="heat_comparison.png",
+        show=False,
+    )
+
+    # 4. 1D slice at t = 0.5
+    pt.plot_solution_1d(
+        model,
+        fixed_coord={"t": 0.5},
+        varying_coord="x",
+        title="Heat Equation: Solution at t = 0.5",
+        save_path="heat_slice_t0.5.png",
+        show=False,
+    )
+
+    print("Saved 4 figures:")
+    print("  - heat_training_history.png")
+    print("  - heat_solution.png")
+    print("  - heat_comparison.png")
+    print("  - heat_slice_t0.5.png")
+
 
 if __name__ == "__main__":
     main()

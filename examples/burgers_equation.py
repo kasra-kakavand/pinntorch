@@ -59,6 +59,8 @@ def main():
     print(f"Network parameters: {model.network.count_parameters():,}")
 
     print("\nStarting training...")
+    model.lambda_ic = 10.0
+    model.lambda_bc = 10.0
     history = model.train(
         epochs=20000,          # was 8000
         learning_rate=1e-3,

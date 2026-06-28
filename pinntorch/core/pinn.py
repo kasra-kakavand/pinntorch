@@ -255,6 +255,7 @@ class PINN(nn.Module):
         n_pde_points: int = 1000,
         n_ic_points: int = 100,
         n_bc_points: int = 100,
+        lbfgs_steps: int = 0,
         verbose: bool = True,
         print_every: int = 100,
     ) -> Dict[str, List[float]]:
@@ -317,8 +318,49 @@ class PINN(nn.Module):
                     f"BC: {bc_loss.item():.6f}"
                 )
 
+        # ------------------------------------------------------------------
+        # Optional second-stage LBFGS refinement
+        # ------------------------------------------------------------------
+        if lbfgs_steps > 0:
+            if verbose:
+                print("-" * 60)
+                print(f"Refining with LBFGS for {lbfgs_steps} steps...")
+
+            # Fix the collocation points for LBFGS (it needs a stable objective,
+            # unlike Adam which can tolerate fresh random samples each step).
+            pde_coords = self._sample_domain(n_pde_points)
+
+            lbfgs = optim.LBFGS(
+                self.network.parameters(),
+                max_iter=lbfgs_steps,
+                history_size=50,
+                line_search_fn="strong_wolfe",
+            )
+
+            def closure():
+                lbfgs.zero_grad()
+                u = self.forward(*pde_coords)
+                pde_loss = torch.mean(self.pde(u, *pde_coords) ** 2)
+                ic_loss = self._compute_ic_loss(n_ic_points)
+                bc_loss = self._compute_bc_loss(n_bc_points)
+                loss = (
+                    self.lambda_pde * pde_loss
+                    + self.lambda_ic * ic_loss
+                    + self.lambda_bc * bc_loss
+                )
+                loss.backward()
+                # record history for plotting
+                self.history["total_loss"].append(loss.item())
+                self.history["pde_loss"].append(pde_loss.item())
+                self.history["ic_loss"].append(ic_loss.item())
+                self.history["bc_loss"].append(bc_loss.item())
+                return loss
+
+            lbfgs.step(closure)
+
+        final_loss = self.history["total_loss"][-1]
         if verbose:
             print("-" * 60)
-            print(f"Training complete! Final loss: {total_loss.item():.6f}")
+            print(f"Training complete! Final loss: {final_loss:.6f}")
 
         return self.history

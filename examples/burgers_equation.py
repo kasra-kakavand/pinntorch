@@ -60,13 +60,13 @@ def main():
 
     print("\nStarting training...")
     history = model.train(
-        epochs=8000,
+        epochs=20000,          # was 8000
         learning_rate=1e-3,
-        n_pde_points=2000,
-        n_ic_points=200,
-        n_bc_points=200,
+        n_pde_points=4000,     # was 2000
+        n_ic_points=400,       # was 200
+        n_bc_points=400,       # was 200
         verbose=True,
-        print_every=1000,
+        print_every=2000,
     )
 
     print("\nTraining complete!")

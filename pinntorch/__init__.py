@@ -22,12 +22,25 @@ Example:
 
 from pinntorch.version import __version__
 
-# Core API - what users will import
+# Core API
 from pinntorch.core.pinn import PINN
-from pinntorch.core.derivatives import diff, gradient, laplacian
+from pinntorch.core.derivatives import diff, gradient, laplacian, divergence, curl
 from pinntorch.conditions.initial import InitialCondition
 from pinntorch.conditions.boundary import BoundaryCondition
 from pinntorch.networks.mlp import MLP
+
+# Visualization (optional - requires matplotlib)
+try:
+    from pinntorch.visualization.plots import (
+        plot_solution,
+        plot_solution_1d,
+        plot_training_history,
+        plot_comparison,
+        plot_error,
+    )
+    _HAS_VIZ = True
+except ImportError:
+    _HAS_VIZ = False
 
 __all__ = [
     "__version__",
@@ -37,6 +50,8 @@ __all__ = [
     "diff",
     "gradient",
     "laplacian",
+    "divergence",
+    "curl",
     # Conditions
     "InitialCondition",
     "BoundaryCondition",
@@ -44,7 +59,16 @@ __all__ = [
     "MLP",
 ]
 
-# Library metadata
+# Add visualization to __all__ if available
+if _HAS_VIZ:
+    __all__.extend([
+        "plot_solution",
+        "plot_solution_1d",
+        "plot_training_history",
+        "plot_comparison",
+        "plot_error",
+    ])
+
 __author__ = "Kasra Kakavand"
 __email__ = "kasrakakavand@gmail.com"
 __license__ = "MIT"

@@ -75,6 +75,40 @@ pip install -e .
 
 ## Quick Start
 
+## Results & Limitations
+
+PINNTorch is an early-stage library. Here is an honest account of what it does well and where it falls short.
+
+### Heat equation (validated)
+
+The 1D heat equation solver is validated against the known analytical
+solution `u(x,t) = sin(πx)·exp(-απ²t)`:
+
+- Mean absolute error: ~2.6e-3
+- L2 error: ~2.8e-3
+
+The PINN solution matches the analytical solution closely across the
+entire domain.
+
+### Burgers' equation (works, with a known limitation)
+
+The nonlinear Burgers' equation is solved using two-stage optimization
+(Adam followed by LBFGS refinement). The solver captures the characteristic
+shock formation near x = 0.
+
+**Known limitation:** under uniform random collocation sampling, the
+solution exhibits mild drift at the domain center at later times, where
+the shock gradient is steepest and uniform sampling under-resolves it.
+Adaptive collocation sampling — the standard remedy — is planned for a
+future release.
+
+### Optimization
+
+Training uses the standard PINN recipe: Adam to reach a good region of
+parameter space, then optional LBFGS refinement (`lbfgs_steps` argument)
+for stable convergence. LBFGS uses fixed collocation points, as its line
+search requires a stable objective.
+
 ### Example: 1D Heat Equation
 
 Solve the heat equation `∂u/∂t = α·∂²u/∂x²` with PINNTorch:
@@ -113,16 +147,13 @@ pt.plot_solution(model)
 
 ## Supported Equations
 
-PINNTorch comes with built-in support for classical PDEs:
-
 | Equation | Description | Status |
 |----------|-------------|--------|
-| Heat | Diffusion processes | ✅ |
-| Burgers | Fluid dynamics | 🚧 |
-| Wave | Wave propagation | 🚧 |
-| Schrödinger | Quantum mechanics | 🚧 |
-| Poisson | Electrostatics | 🚧 |
-| Navier-Stokes | Fluid flow | 📋 |
+| Heat | 1D diffusion; validated against analytical solution (L2 error ~3e-3) | ✅ |
+| Burgers | 1D nonlinear advection-diffusion; captures shock, mild center drift | ✅ |
+| Wave | Second-order in time | 📋 Planned |
+| Schrödinger | Quantum mechanics | 📋 Planned |
+| Poisson | Electrostatics | 📋 Planned |
 
 ## Why Physics-Informed Neural Networks?
 

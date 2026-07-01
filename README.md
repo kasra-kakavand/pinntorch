@@ -26,38 +26,27 @@ Traditional PDE solvers (finite differences, finite elements) require discretiza
 - **Mesh-free** solutions
 - **Continuous** representations
 - **High-dimensional** problem handling
-- **Inverse problem** solving capabilities
+- **Mesh-free** solutions
+- **Continuous** representations
+- **Automatic differentiation** for exact PDE residuals
+- **Simple, PyTorch-native API**
 
-```python
-import pinntorch as pt
-
-# Define your PDE
-def heat_equation(u, x, t, alpha=0.1):
-    u_t = pt.diff(u, t)
-    u_xx = pt.diff(u, x, order=2)
-    return u_t - alpha * u_xx
-
-# Train a neural network to solve it
-model = pt.PINN(
-    pde=heat_equation,
-    domain=[(0, 1), (0, 1)],  # time, space
-)
-
-model.train(epochs=10000)
-
-# Get solution at any point
-u_value = model.predict(x=0.5, t=0.3)
-```
 
 ## Key Features
 
-- **Simple API** - Define PDEs as Python functions
-- **Multiple PDEs** - Heat, Burgers, wave, Schrödinger, and custom equations
-- **Boundary conditions** - Dirichlet, Neumann, periodic, and custom
-- **Initial conditions** - Easy specification with functions
-- **Inverse problems** - Discover PDE parameters from data
-- **PyTorch native** - Built on PyTorch with full autograd support
-- **Visualizations** - Beautiful built-in plotting
+- **Simple API** — define PDEs as plain Python functions
+- **Validated solvers** — heat equation (validated) and Burgers' equation (with documented limitations)
+- **Dirichlet boundary conditions** and first-order initial conditions
+- **Two-stage optimization** — Adam followed by optional LBFGS refinement
+- **Automatic differentiation** — exact derivatives via PyTorch autograd
+- **Built-in visualization** — solution heatmaps, 1D slices, training curves
+
+### Planned
+
+- Neumann and periodic boundary conditions
+- Second-order-in-time PDEs (wave equation)
+- Inverse problems (parameter discovery from data)
+- Adaptive collocation sampling
 
 ## Installation
 
@@ -72,42 +61,6 @@ git clone https://github.com/kasra-kakavand/pinntorch.git
 cd pinntorch
 pip install -e .
 ```
-
-## Quick Start
-
-## Results & Limitations
-
-PINNTorch is an early-stage library. Here is an honest account of what it does well and where it falls short.
-
-### Heat equation (validated)
-
-The 1D heat equation solver is validated against the known analytical
-solution `u(x,t) = sin(πx)·exp(-απ²t)`:
-
-- Mean absolute error: ~2.6e-3
-- L2 error: ~2.8e-3
-
-The PINN solution matches the analytical solution closely across the
-entire domain.
-
-### Burgers' equation (works, with a known limitation)
-
-The nonlinear Burgers' equation is solved using two-stage optimization
-(Adam followed by LBFGS refinement). The solver captures the characteristic
-shock formation near x = 0.
-
-**Known limitation:** under uniform random collocation sampling, the
-solution exhibits mild drift at the domain center at later times, where
-the shock gradient is steepest and uniform sampling under-resolves it.
-Adaptive collocation sampling — the standard remedy — is planned for a
-future release.
-
-### Optimization
-
-Training uses the standard PINN recipe: Adam to reach a good region of
-parameter space, then optional LBFGS refinement (`lbfgs_steps` argument)
-for stable convergence. LBFGS uses fixed collocation points, as its line
-search requires a stable objective.
 
 ### Example: 1D Heat Equation
 
@@ -155,6 +108,41 @@ pt.plot_solution(model)
 | Schrödinger | Quantum mechanics | 📋 Planned |
 | Poisson | Electrostatics | 📋 Planned |
 
+## Results & Limitations
+
+PINNTorch is an early-stage library. Here is an honest account of what it does well and where it falls short.
+
+### Heat equation (validated)
+
+The 1D heat equation solver is validated against the known analytical
+solution `u(x,t) = sin(πx)·exp(-απ²t)`:
+
+- Mean absolute error: ~2.6e-3
+- L2 error: ~2.8e-3
+
+The PINN solution matches the analytical solution closely across the
+entire domain.
+
+### Burgers' equation (works, with a known limitation)
+
+The nonlinear Burgers' equation is solved using two-stage optimization
+(Adam followed by LBFGS refinement). The solver captures the characteristic
+shock formation near x = 0.
+
+**Known limitation:** under uniform random collocation sampling, the
+solution exhibits mild drift at the domain center at later times, where
+the shock gradient is steepest and uniform sampling under-resolves it.
+Adaptive collocation sampling — the standard remedy — is planned for a
+future release.
+
+### Optimization
+
+Training uses the standard PINN recipe: Adam to reach a good region of
+parameter space, then optional LBFGS refinement (`lbfgs_steps` argument)
+for stable convergence. LBFGS uses fixed collocation points, as its line
+search requires a stable objective.
+
+
 ## Why Physics-Informed Neural Networks?
 
 PINNs represent a paradigm shift in scientific computing:
@@ -171,14 +159,17 @@ PINNs represent a paradigm shift in scientific computing:
 ## Roadmap
 
 - [x] Project foundation
-- [ ] Core PINN class with autograd
-- [ ] Heat equation solver
-- [ ] Burgers equation solver
-- [ ] Wave equation solver
-- [ ] Visualization module
+- [x] Core PINN class with autograd
+- [x] Heat equation solver (validated)
+- [x] Burgers equation solver
+- [x] Adam + LBFGS optimization
+- [x] Visualization module
+- [x] Test suite
 - [ ] PyPI release (v0.1.0)
+- [ ] Neumann / periodic boundary conditions
+- [ ] Wave equation (second-order in time)
 - [ ] Inverse problem support
-- [ ] Multi-dimensional PDEs
+- [ ] Adaptive collocation sampling
 - [ ] Documentation site
 
 ## Citation

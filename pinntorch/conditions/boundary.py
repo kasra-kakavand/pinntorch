@@ -70,7 +70,6 @@ class BoundaryCondition:
                 f"Only 'dirichlet' is currently implemented. "
                 f"Neumann and periodic are planned for a future release."
             )
-
         self.function = function
         self.condition_type = condition_type
         self.boundary = boundary

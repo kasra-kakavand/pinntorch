@@ -59,6 +59,13 @@ class BoundaryCondition:
                 f"Must be 'dirichlet', 'neumann', or 'periodic'"
             )
 
+        if condition_type != self.DIRICHLET:
+            raise NotImplementedError(
+                f"'{condition_type}' boundary conditions are not yet supported. "
+                f"Only 'dirichlet' is currently implemented. "
+                f"Neumann and periodic are planned for a future release."
+            )
+
         if boundary not in ["left", "right", "both"]:
             raise ValueError(
                 f"Unknown boundary: {boundary}. "

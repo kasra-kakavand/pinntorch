@@ -64,6 +64,12 @@ class BoundaryCondition:
                 f"Unknown boundary: {boundary}. "
                 f"Must be 'left', 'right', or 'both'"
             )
+        if condition_type != self.DIRICHLET:
+            raise NotImplementedError(
+                f"'{condition_type}' boundary conditions are not yet supported. "
+                f"Only 'dirichlet' is currently implemented. "
+                f"Neumann and periodic are planned for a future release."
+            )
 
         self.function = function
         self.condition_type = condition_type
